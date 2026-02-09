@@ -25,14 +25,11 @@ LLE_d3 = SemilinearPDE(
     p
 );
 
-
-
-
 u2_d3 = solve_rkip(LLE_d3; saveat=t, abstol=1e-4, reltol=1e-8);
 heatmap(abs2.(u2_d3))
 
 begin
-        # How to use DSP to compute a PSD 
+    # How to use DSP to compute a PSD 
     using FFTW
     using DSP
 

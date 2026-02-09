@@ -22,8 +22,6 @@ LLE_scan = SemilinearPDE(
     p
 );
 
-##=
-
 u2_scan = solve_rkip(LLE_scan; saveat=t, abstol=1e-4, reltol=1e-8);
 heatmap(abs2.(u2_scan))
 

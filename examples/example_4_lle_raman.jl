@@ -27,10 +27,8 @@ LLE_raman = SemilinearPDE(
 );
 
 u2_raman = solve_rkip(LLE_raman; saveat=t, abstol=1e-2, reltol=1e-4);
-
 heatmap(abs2.(u2_raman))
 
-# u2_scan = solve_rkip(LLE_scan)
 
 
 

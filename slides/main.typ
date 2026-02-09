@@ -205,7 +205,7 @@ Fourier transform for performing the DFT  $cal(F)$ on u.
   winget install --id Git.Git -e --source winget
   ```
 
-  2. Ensure you have VSCode installed (#link("https://code.visualstudio.com/download")), with its Julia extension
+  2. Ensure you have VSCode installed (#link("https://code.visualstudio.com/download")), with its Julia extension.
 
   3. Clone the folder, and open it in VSCode.
   ```shell
@@ -431,10 +431,10 @@ Fourier transform for performing the DFT  $cal(F)$ on u.
   === Adding a custom nonlinearity.
   To add a new nonlinearity, declares a new empty struct corresponding this nonlinearity, which inherits `AbstractNonlinearPart` and implements `(nl::CustomNonlinearity)(du, u, p, t)`.
   ```julia
-    struct CustomNonlinearity <: AbstractNonlinearPart end
+  struct CustomNonlinearity <: AbstractNonlinearPart end
 
   function (nl::CustomNonlinearity)(du, u, p, t)
-    # Put your nonlinear function here and stores the result in du
+    # Put your nonlinear function here and store the result in du
   end
   ```
 
@@ -450,9 +450,9 @@ Fourier transform for performing the DFT  $cal(F)$ on u.
 
 #slide[
   ==== Custom Nonlinearity: PDLNSE
-  Example nonlinearity: parametric driven NLSE.
+  Example nonlinearity for a parametric driven NLSE:
 
-  $$
+  $ partial_T u(T, t) = (-1 + i partial_t^2) u + i(Delta - abs(u)^2)u +kappa u^* $
 
   ```julia
   struct PDLNSE <: AbstractNonlinearPart end
