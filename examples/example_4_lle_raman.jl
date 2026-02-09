@@ -3,24 +3,20 @@ using Plots
 
 include("../src/mod.jl")
 
-# FFTW.set_provider!("mkl")
-FFTW.set_num_threads(14)
-
 Δ_scan(p, t) = p.Δ₀ + p.Δ_rate * t
- 
-p = (;
-    S=5.5,
+ p = (;
+    S=7.5,
     Δ₀=-4.0,
-    Δ_rate=0.15,
-    τ_R=2e-4,
+    Δ_rate=1.5,
     Δ = Δ_scan, 
+    τ_R=2e-4,
 )
+dτ = 0.05
 
 u0 = lle_hss(p.S, p.Δ₀, 1024; noise=1e-4)
-dτ = 0.05
-t = 0.0:2.5:300
 
-LLE_scan = SemilinearPDE(
+t = 0.0:0.05:50
+LLE_raman = SemilinearPDE(
     StandartLLE(;
          N̂=LLERamanNonlinearPart() # Raman nonlinearity
     ),
@@ -30,9 +26,9 @@ LLE_scan = SemilinearPDE(
     p
 );
 
-u2_scan = solve_rkip(LLE_scan; saveat=t);
+u2_raman = solve_rkip(LLE_raman; saveat=t, abstol=1e-2, reltol=1e-4);
 
-heatmap(abs2.(u2_scan))
+heatmap(abs2.(u2_raman))
 
 # u2_scan = solve_rkip(LLE_scan)
 

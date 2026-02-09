@@ -135,7 +135,7 @@ function solve_rkip!(res,
     abstol=1e-10,
     progress=true,
     saveat=nothing,
-    progress_steps=100,
+    progress_steps=10,
     save_everystep=false,
     dense=false,
     kwargs...

@@ -50,7 +50,7 @@ models.
 
 The normalized LLE reads:
 
-∂ₜ u = -(1 + iΔ)u + i|u|²u - i∂²_τ u + S
+∂ₜ u = -(1 + iΔ + i ∂_τ^2)u + i|u|²u + S
 
 where:
 - `Δ` is the detuning,
@@ -109,19 +109,12 @@ The parameter container `p` must define:
 - `p.S` — pump field (complex or function).
 
 """
-struct LLENonlinearPart <: AbstractNonlinearPart
+struct LLENonlinearPart <: AbstractNonlinearPart end
 
-end
-
-
-
-function @fastmath (lle::LLENonlinearPart)(du, u, p, t, cache)
-    Δ = get_var(lle, p.Δ, p, t)
+function @fastmath (lle::LLENonlinearPart)(du, u, p, t)
+    Δ = get_var(lle, p.Δ, p, t) # S and Δ can be function of t and p 
     S = get_var(lle, p.S, p, t)
 
-    @. du = 1im * (abs2.(u) - Δ) * u + S
+    @. du = 1im * (abs2.(u) - Δ) * u + S # in place-computation of the LLE
+    return du
 end
-
-
-
-

@@ -49,21 +49,26 @@ This matches the calling convention expected by SciML split ODE solvers.
 Abstract supertype for nonlinear PDE terms.
 
 A nonlinear part must implement a call overload with signature:
-`
-nl(du, u, p, t, cache)
-`
-or 
 
 `
 nl(du, u, p, t)
 `
-if no cache is used. 
 
 Optionally, it may provide:
-- `get_cache(nl, u, p)` for preallocated work arrays. Returns `nothing` by default.
-- time- or parameter-dependent coefficients via `get_var`.
+- `get_cache(nl::AbstractNonlinearPart, u, p)` for preallocated work arrays. Returns `nothing` by default.
+- time- or parameter-dependent coefficients via `get_var(nl::AbstractNonlinearPart, var, p, t)`.
+
+`p` will contains the equations parameters as well as
+- `p.τ`: array spatial variable.
+- `p.freq`: array, corresponding spectral variable.
+- `p.bifft_plan`: `BiFFTPlan`, for preallocated FFTs and IFFTs.
+
+
+Cache initialized with `get_cache(nl, u, p)` will be passed through p 
+and acessible with `p.cache`.
 """
 abstract type AbstractNonlinearPart end
+
 
 """
     get_cache(nl, u, p)
@@ -86,11 +91,6 @@ get_var(::AbstractNonlinearPart, var::Real, _, _) = var
 get_var(::AbstractNonlinearPart, var::Function, p, t) = var(p, t)
 
 """
-Fallback call when no cache is used.
-"""
-(nl::AbstractNonlinearPart)(du, u, p, t, ::Nothing) = nl(du, u, p, t)
-
-"""
     NonlinearPartWrapper
 
 Wraps a nonlinear operator that acts in physical space, while the solver
@@ -103,7 +103,7 @@ This wrapper:
 
 This pattern is used to reduce the number of FFTs by half in the RKIP implementation.
 """
-struct NonlinearPartWrapper{F<:AbstractNonlinearPart,tmpType, cacheType}
+struct NonlinearPartWrapper{F<:AbstractNonlinearPart,tmpType,cacheType}
     f::F
     tmp::tmpType
     cache::cacheType
@@ -126,7 +126,11 @@ Internally, the computation is performed in physical space using FFTs.
 
     copyto!(tmp, fft_tmp)
 
-    f(du, tmp, p, t, cache)
+    if isnothing(cache)
+        f(du, tmp, p, t)
+    else
+        f(du, tmp, (; cache, p...), t)
+    end
 
     copyto!(fft_tmp, du)
     bifft_plan.fft_plan * fft_tmp

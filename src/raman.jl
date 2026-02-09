@@ -30,26 +30,26 @@ struct LLERamanNonlinearPart <: AbstractNonlinearPart end
 
 # For Raman, we need to implement a cache to store intermediate computation
 function get_cache(::LLERamanNonlinearPart, u0, p)
-    abs2_tmp = similar(u0)
+    abs2_tmp = similar(u0) # pre-allocate an array for intermediate storage
     raman_fourier_resp = convert(
         typeof(u0),
         @. -1im * 2π * p.freq * p.τ_R
-    )
-    return (; abs2_tmp, raman_fourier_resp)
+    ) # pre-computed the Rama kernel in spectral space
+    return (; abs2_tmp, raman_fourier_resp) # cache are supplied as a NamedTuple
 end
 
 
-@fastmath function (lle_raman::LLERamanNonlinearPart)(du, u, p, t, cache)
+@fastmath function (lle_raman::LLERamanNonlinearPart)(du, u, p, t)
     S = get_var(lle_raman, p.S, p, t) # fetch eventually time varying function
     Δ = get_var(lle_raman, p.Δ, p, t) # fetch eventually time varying function
 
-    @unpack abs2_tmp, raman_fourier_resp = cache
+    @unpack abs2_tmp, raman_fourier_resp = p.cache # We can acces the cache using p.cache
 
-    abs2_tmp .= abs2.(u)
+    abs2_tmp .= abs2.(u) # used form temporary storage
 
-    @. du = 1im * (abs2_tmp - Δ) * u + S
+    @. du = 1im * (abs2_tmp - Δ) * u + S # LLE
 
-    fft!(p.bifft_plan, abs2_tmp)
+    fft!(p.bifft_plan, abs2_tmp) 
     @. abs2_tmp = raman_fourier_resp * abs2_tmp
     ifft!(p.bifft_plan, abs2_tmp)
 
