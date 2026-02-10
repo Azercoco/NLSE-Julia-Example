@@ -488,7 +488,7 @@ Fourier transform for performing the DFT  $cal(F)$ on u.
 
   The cache content can be accessed in the main evaluation with `p.cache`:
   ```julia
-  function (nl::PDLNSE)(du, u, p, t)
+  function (nl::CustomNonlinearityWithCache)(du, u, p, t)
     cached_array = p.cache.cached_array
     ....
   ```
